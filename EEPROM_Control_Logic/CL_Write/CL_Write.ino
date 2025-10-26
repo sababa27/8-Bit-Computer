@@ -105,7 +105,7 @@ uint16_t LDI(byte micro, byte flags){
 uint16_t JMP(byte micro, byte flags){
   uint16_t ans = 0;
 
-  if(micro = 0b010)
+  if(micro == 0b010)
     ans = Instruction_Out + Counter_Jump;
 
   return ans;
@@ -114,7 +114,7 @@ uint16_t JMP(byte micro, byte flags){
 uint16_t JMC(byte micro, byte flags){
   uint16_t ans = 0;
 
-  if(flags == 0b10 || flags == 0b11)
+  if (micro == 0b010 && (flags == 0b10 || flags == 0b11))
     ans = Instruction_Out + Counter_Jump;
 
   return ans;
@@ -123,7 +123,7 @@ uint16_t JMC(byte micro, byte flags){
 uint16_t JMZ(byte micro, byte flags){
   uint16_t ans = 0;
 
-  if(flags == 0b01 || flags == 0b11)
+  if (micro == 0b010 && (flags == 0b01 || flags == 0b11))
     ans = Instruction_Out + Counter_Jump;
 
   return ans;
@@ -199,7 +199,7 @@ void setup() {
         uint16_t instr = 0b0001;
 
         uint16_t data = ADD(micro, flags);
-        byte d1 = (byte)(data >> 4);
+        byte d1 = (byte)(data >> 8);
         byte d2 = (byte)data;
 
         uint16_t adr1 = instr<<5;
@@ -207,12 +207,16 @@ void setup() {
         uint16_t adr3 = flags;
 
         uint16_t adr = adr1 + adr2 + adr3;
+      
+      byte d = d1;
 
-      eepromWrite(adr, d1);
+      eepromWrite(adr, d);
 
       delay(10);
 
       byte verify = eepromRead(adr);
+
+      printStuff(adr, d, verify, data);
       }
   }
 
@@ -255,18 +259,18 @@ void writeDataBus(byte data) {
 void eepromWrite(uint16_t address, byte data) {
   setAddress(address);
 
-  clearDataBus();           // ensure bus starts clean
-  writeDataBus(data);       // drive new data
+  clearDataBus();
+  writeDataBus(data);
   setDataPinsOutput();
 
-  delayMicroseconds(10);    // let address/data settle
+  delayMicroseconds(10); 
 
   digitalWrite(pinOE, HIGH);
   digitalWrite(pinWE, LOW);
-  delayMicroseconds(20);    // write pulse width (safe)
+  delayMicroseconds(20);
   digitalWrite(pinWE, HIGH);
 
-  delay(20);                // internal write cycle time
+  delay(20);
 }
 
 byte eepromRead(uint16_t address) {
@@ -284,4 +288,24 @@ byte eepromRead(uint16_t address) {
 
   digitalWrite(pinOE, HIGH);
   return data;
+}
+
+
+void printStuff(uint16_t adr, byte data, byte verify, uint16_t wholeData){
+    Serial.println("--------");
+
+    Serial.print("Whole Data - ");
+    Serial.println(wholeData, BIN);
+
+    Serial.print("adr - ");
+    Serial.print(adr, BIN);
+    Serial.print(" (");
+    Serial.print(adr);
+    Serial.println(")");
+
+    Serial.print("write - ");
+    Serial.println(data, BIN);
+
+    Serial.print("read ");
+    Serial.println(verify, BIN);
 }

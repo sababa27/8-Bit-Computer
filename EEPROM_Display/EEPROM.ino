@@ -99,9 +99,6 @@ void printStuff(uint16_t adr, byte data, byte verify, uint16_t num){
 
     Serial.print("read ");
     Serial.println(verify, BIN);
-
-
-
 }
 
 void setAddress(uint16_t address) {
@@ -134,18 +131,18 @@ void writeDataBus(byte data) {
 void eepromWrite(uint16_t address, byte data) {
   setAddress(address);
 
-  clearDataBus();           // ensure bus starts clean
-  writeDataBus(data);       // drive new data
+  clearDataBus();
+  writeDataBus(data);
   setDataPinsOutput();
 
-  delayMicroseconds(10);    // let address/data settle
+  delayMicroseconds(10); 
 
   digitalWrite(pinOE, HIGH);
   digitalWrite(pinWE, LOW);
-  delayMicroseconds(20);    // write pulse width (safe)
+  delayMicroseconds(20);
   digitalWrite(pinWE, HIGH);
 
-  delay(20);                // internal write cycle time
+  delay(20);
 }
 
 byte eepromRead(uint16_t address) {
